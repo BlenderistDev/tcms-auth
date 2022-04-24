@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+option go_package = "tcms-auth/pkg/auth";
+
+package telegram;
+
+import "google/protobuf/empty.proto";
+
+service TcmsAuth {
+
+}
