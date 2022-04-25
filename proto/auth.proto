@@ -4,8 +4,15 @@ option go_package = "tcms-auth/pkg/auth";
 
 package telegram;
 
-import "google/protobuf/empty.proto";
-
 service TcmsAuth {
+  rpc Register(RegisterMessage) returns (Result);
+}
 
+message RegisterMessage {
+  string username = 1;
+  string password = 2;
+}
+
+message Result {
+  bool success = 1;
 }
