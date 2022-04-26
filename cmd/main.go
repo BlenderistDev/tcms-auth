@@ -5,6 +5,7 @@ import (
 	"net"
 	"os"
 
+	"github.com/joho/godotenv"
 	"google.golang.org/grpc"
 	"tcms-auth/internal/database"
 	"tcms-auth/internal/database/repository"
@@ -13,6 +14,12 @@ import (
 )
 
 func main() {
+
+	// Load values from .env into the system
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	db, err := database.GetConnection(os.Getenv("DATABASE_URL"))
 	if err != nil {

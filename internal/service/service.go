@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"fmt"
 
 	"tcms-auth/internal/database/model"
 	"tcms-auth/internal/database/repository"
@@ -29,4 +30,21 @@ func (s *AuthGrpcService) Register(_ context.Context, user *auth.AuthData) (*aut
 		return &auth.Result{}, err
 	}
 	return &auth.Result{Success: true}, nil
+}
+
+func (s *AuthGrpcService) Login(_ context.Context, loginData *auth.AuthData) (*auth.LoginResult, error) {
+	user, err := s.UserRepo.GetUser(loginData.Username)
+	if err != nil {
+		return nil, err
+	}
+	if password.Compare(user.Password, loginData.Password) != nil {
+		return nil, fmt.Errorf("wrong password")
+	}
+
+	token, err := s.SessionRepo.Create(user.Id)
+	if err != nil {
+		return nil, err
+	}
+
+	return &auth.LoginResult{Token: token}, err
 }
