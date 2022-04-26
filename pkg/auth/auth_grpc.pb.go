@@ -18,7 +18,8 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type TcmsAuthClient interface {
-	Register(ctx context.Context, in *RegisterMessage, opts ...grpc.CallOption) (*Result, error)
+	Register(ctx context.Context, in *AuthData, opts ...grpc.CallOption) (*Result, error)
+	Login(ctx context.Context, in *AuthData, opts ...grpc.CallOption) (*LoginResult, error)
 }
 
 type tcmsAuthClient struct {
@@ -29,9 +30,18 @@ func NewTcmsAuthClient(cc grpc.ClientConnInterface) TcmsAuthClient {
 	return &tcmsAuthClient{cc}
 }
 
-func (c *tcmsAuthClient) Register(ctx context.Context, in *RegisterMessage, opts ...grpc.CallOption) (*Result, error) {
+func (c *tcmsAuthClient) Register(ctx context.Context, in *AuthData, opts ...grpc.CallOption) (*Result, error) {
 	out := new(Result)
 	err := c.cc.Invoke(ctx, "/auth.TcmsAuth/Register", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *tcmsAuthClient) Login(ctx context.Context, in *AuthData, opts ...grpc.CallOption) (*LoginResult, error) {
+	out := new(LoginResult)
+	err := c.cc.Invoke(ctx, "/auth.TcmsAuth/Login", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -42,7 +52,8 @@ func (c *tcmsAuthClient) Register(ctx context.Context, in *RegisterMessage, opts
 // All implementations must embed UnimplementedTcmsAuthServer
 // for forward compatibility
 type TcmsAuthServer interface {
-	Register(context.Context, *RegisterMessage) (*Result, error)
+	Register(context.Context, *AuthData) (*Result, error)
+	Login(context.Context, *AuthData) (*LoginResult, error)
 	mustEmbedUnimplementedTcmsAuthServer()
 }
 
@@ -50,8 +61,11 @@ type TcmsAuthServer interface {
 type UnimplementedTcmsAuthServer struct {
 }
 
-func (UnimplementedTcmsAuthServer) Register(context.Context, *RegisterMessage) (*Result, error) {
+func (UnimplementedTcmsAuthServer) Register(context.Context, *AuthData) (*Result, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Register not implemented")
+}
+func (UnimplementedTcmsAuthServer) Login(context.Context, *AuthData) (*LoginResult, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Login not implemented")
 }
 func (UnimplementedTcmsAuthServer) mustEmbedUnimplementedTcmsAuthServer() {}
 
@@ -67,7 +81,7 @@ func RegisterTcmsAuthServer(s grpc.ServiceRegistrar, srv TcmsAuthServer) {
 }
 
 func _TcmsAuth_Register_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(RegisterMessage)
+	in := new(AuthData)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -79,7 +93,25 @@ func _TcmsAuth_Register_Handler(srv interface{}, ctx context.Context, dec func(i
 		FullMethod: "/auth.TcmsAuth/Register",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TcmsAuthServer).Register(ctx, req.(*RegisterMessage))
+		return srv.(TcmsAuthServer).Register(ctx, req.(*AuthData))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _TcmsAuth_Login_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AuthData)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TcmsAuthServer).Login(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/auth.TcmsAuth/Login",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TcmsAuthServer).Login(ctx, req.(*AuthData))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -94,6 +126,10 @@ var TcmsAuth_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Register",
 			Handler:    _TcmsAuth_Register_Handler,
+		},
+		{
+			MethodName: "Login",
+			Handler:    _TcmsAuth_Login_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

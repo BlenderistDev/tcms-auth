@@ -5,14 +5,19 @@ option go_package = "tcms-auth/pkg/auth";
 package auth;
 
 service TcmsAuth {
-  rpc Register(RegisterMessage) returns (Result);
+  rpc Register(AuthData) returns (Result);
+  rpc Login(AuthData) returns (LoginResult);
 }
 
-message RegisterMessage {
+message AuthData {
   string username = 1;
   string password = 2;
 }
 
 message Result {
   bool success = 1;
+}
+
+message LoginResult {
+  string token = 1;
 }

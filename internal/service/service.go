@@ -16,7 +16,7 @@ type AuthGrpcService struct {
 }
 
 // Register grpc endpoint for user registration
-func (s *AuthGrpcService) Register(_ context.Context, user *auth.RegisterMessage) (*auth.Result, error) {
+func (s *AuthGrpcService) Register(_ context.Context, user *auth.AuthData) (*auth.Result, error) {
 	pass, err := password.Generate(user.GetPassword())
 	if err != nil {
 		return nil, err
