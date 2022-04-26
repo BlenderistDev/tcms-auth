@@ -1,5 +1,42 @@
 package main
 
+import (
+	"log"
+	"net"
+	"os"
+
+	"google.golang.org/grpc"
+	"tcms-auth/internal/database"
+	"tcms-auth/internal/database/repository"
+	"tcms-auth/internal/service"
+	"tcms-auth/pkg/auth"
+)
+
 func main() {
-	select {}
+
+	db, err := database.GetConnection(os.Getenv("DATABASE_URL"))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	userRepo := repository.NewUserRepository(db)
+
+	if err := startGrpcServer(userRepo); err != nil {
+		log.Fatal(err)
+	}
+
+}
+
+func startGrpcServer(userRepo repository.UserRepository) error {
+	addr := os.Getenv("AUTH_GRPC_HOST")
+	lis, err := net.Listen("tcp", addr)
+	if err != nil {
+		return err
+	}
+
+	s := grpc.NewServer()
+
+	auth.RegisterTcmsAuthServer(s, &service.AuthGrpcService{UserRepo: userRepo})
+
+	return s.Serve(lis)
 }
