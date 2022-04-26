@@ -2,7 +2,7 @@ syntax = "proto3";
 
 option go_package = "tcms-auth/pkg/auth";
 
-package telegram;
+package auth;
 
 service TcmsAuth {
   rpc Register(RegisterMessage) returns (Result);

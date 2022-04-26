@@ -31,7 +31,7 @@ func NewTcmsAuthClient(cc grpc.ClientConnInterface) TcmsAuthClient {
 
 func (c *tcmsAuthClient) Register(ctx context.Context, in *RegisterMessage, opts ...grpc.CallOption) (*Result, error) {
 	out := new(Result)
-	err := c.cc.Invoke(ctx, "/telegram.TcmsAuth/Register", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/auth.TcmsAuth/Register", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -76,7 +76,7 @@ func _TcmsAuth_Register_Handler(srv interface{}, ctx context.Context, dec func(i
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/telegram.TcmsAuth/Register",
+		FullMethod: "/auth.TcmsAuth/Register",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(TcmsAuthServer).Register(ctx, req.(*RegisterMessage))
@@ -88,7 +88,7 @@ func _TcmsAuth_Register_Handler(srv interface{}, ctx context.Context, dec func(i
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var TcmsAuth_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "telegram.TcmsAuth",
+	ServiceName: "auth.TcmsAuth",
 	HandlerType: (*TcmsAuthServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
