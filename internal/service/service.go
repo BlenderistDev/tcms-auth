@@ -10,7 +10,8 @@ import (
 )
 
 type AuthGrpcService struct {
-	UserRepo repository.UserRepository
+	UserRepo    repository.UserRepository
+	SessionRepo repository.SessionRepository
 	auth.UnimplementedTcmsAuthServer
 }
 

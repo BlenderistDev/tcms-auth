@@ -20,14 +20,15 @@ func main() {
 	}
 
 	userRepo := repository.NewUserRepository(db)
+	sessionRepo := repository.NewSessionRepository(db)
 
-	if err := startGrpcServer(userRepo); err != nil {
+	if err := startGrpcServer(userRepo, sessionRepo); err != nil {
 		log.Fatal(err)
 	}
 
 }
 
-func startGrpcServer(userRepo repository.UserRepository) error {
+func startGrpcServer(userRepo repository.UserRepository, sessionRepo repository.SessionRepository) error {
 	addr := os.Getenv("AUTH_GRPC_HOST")
 	lis, err := net.Listen("tcp", addr)
 	if err != nil {
@@ -36,7 +37,10 @@ func startGrpcServer(userRepo repository.UserRepository) error {
 
 	s := grpc.NewServer()
 
-	auth.RegisterTcmsAuthServer(s, &service.AuthGrpcService{UserRepo: userRepo})
+	auth.RegisterTcmsAuthServer(s, &service.AuthGrpcService{
+		UserRepo:    userRepo,
+		SessionRepo: sessionRepo,
+	})
 
 	return s.Serve(lis)
 }
