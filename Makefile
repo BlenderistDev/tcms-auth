@@ -21,3 +21,6 @@ gen-session-repository-mock:
 
 gen-user-repository-mock:
 	@mockgen -source=internal/database/repository/userRepository.go -destination=internal/testing/database/repository/userRepository.go
+
+gen-password-generator-mock:
+	@mockgen -source=internal/password/hash.go -destination=internal/testing/password/hash.go
