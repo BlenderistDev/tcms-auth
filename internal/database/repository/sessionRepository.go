@@ -5,7 +5,7 @@ import (
 
 	"github.com/jmoiron/sqlx"
 	"tcms-auth/internal/database/model"
-	"tcms-auth/internal/database/session"
+	"tcms-auth/internal/session"
 )
 
 type sessionRepository struct {
