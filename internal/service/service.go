@@ -11,14 +11,15 @@ import (
 )
 
 type AuthGrpcService struct {
-	UserRepo    repository.UserRepository
-	SessionRepo repository.SessionRepository
+	UserRepo          repository.UserRepository
+	SessionRepo       repository.SessionRepository
+	PasswordGenerator *password.Generator
 	auth.UnimplementedTcmsAuthServer
 }
 
 // Register grpc endpoint for user registration
 func (s *AuthGrpcService) Register(_ context.Context, user *auth.AuthData) (*auth.Result, error) {
-	pass, err := password.Generate(user.GetPassword())
+	pass, err := s.PasswordGenerator.Generate(user.GetPassword())
 	if err != nil {
 		return nil, err
 	}
@@ -37,7 +38,7 @@ func (s *AuthGrpcService) Login(_ context.Context, loginData *auth.AuthData) (*a
 	if err != nil {
 		return nil, err
 	}
-	if password.Compare(user.Password, loginData.Password) != nil {
+	if s.PasswordGenerator.Compare(user.Password, loginData.Password) != nil {
 		return nil, fmt.Errorf("wrong password")
 	}
 

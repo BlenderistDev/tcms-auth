@@ -9,6 +9,7 @@ import (
 	"google.golang.org/grpc"
 	"tcms-auth/internal/database"
 	"tcms-auth/internal/database/repository"
+	"tcms-auth/internal/password"
 	"tcms-auth/internal/service"
 	"tcms-auth/pkg/auth"
 )
@@ -45,8 +46,9 @@ func startGrpcServer(userRepo repository.UserRepository, sessionRepo repository.
 	s := grpc.NewServer()
 
 	auth.RegisterTcmsAuthServer(s, &service.AuthGrpcService{
-		UserRepo:    userRepo,
-		SessionRepo: sessionRepo,
+		UserRepo:          userRepo,
+		SessionRepo:       sessionRepo,
+		PasswordGenerator: &password.Generator{},
 	})
 
 	return s.Serve(lis)

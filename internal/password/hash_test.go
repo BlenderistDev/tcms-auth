@@ -6,9 +6,10 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestGenerate_Compare(t *testing.T) {
+func TestGenerator_Generate_Compare(t *testing.T) {
 	const password string = "secret"
-	hash, err := Generate(password)
+	g := Generator{}
+	hash, err := g.Generate(password)
 	assert.Nil(t, err)
-	assert.Nil(t, Compare(hash, password))
+	assert.Nil(t, g.Compare(hash, password))
 }
