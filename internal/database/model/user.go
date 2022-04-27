@@ -6,3 +6,8 @@ type User struct {
 	Password          string `db:"password"`
 	TelegramAccessKey string `db:"telegram_access_key"`
 }
+
+type AuthUser struct {
+	Username          string `db:"username"`
+	TelegramAccessKey string `db:"telegram_access_key"`
+}

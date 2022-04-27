@@ -48,3 +48,19 @@ func (s *AuthGrpcService) Login(_ context.Context, loginData *auth.AuthData) (*a
 
 	return &auth.LoginResult{Token: token}, err
 }
+
+func (s *AuthGrpcService) CheckAuth(_ context.Context, authData *auth.LoginResult) (*auth.CheckAuthResult, error) {
+	user, err := s.SessionRepo.GetUser(authData.Token)
+	if err != nil {
+		return nil, err
+	}
+
+	if user == nil {
+		return nil, fmt.Errorf("user is not authed")
+	}
+
+	return &auth.CheckAuthResult{
+		Username:      user.Username,
+		TelegramToken: user.TelegramAccessKey,
+	}, nil
+}

@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/jmoiron/sqlx"
+	"tcms-auth/internal/database/model"
 	"tcms-auth/internal/database/session"
 )
 
@@ -13,6 +14,7 @@ type sessionRepository struct {
 
 type SessionRepository interface {
 	Create(userId int) (string, error)
+	GetUser(token string) (*model.AuthUser, error)
 }
 
 // NewSessionRepository creates new session repository
@@ -28,4 +30,29 @@ func (r *sessionRepository) Create(userId int) (string, error) {
 		return "", err
 	}
 	return token, nil
+}
+
+func (r sessionRepository) GetUser(token string) (*model.AuthUser, error) {
+	rows, err := r.db.Queryx(`
+		SELECT u.username, u.telegram_access_key
+		FROM user_session
+		LEFT JOIN users u on u.id = user_session.user_id
+		WHERE user_session.token = $1;
+	`, token)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if !rows.Next() {
+		return nil, nil
+	}
+
+	var authUser model.AuthUser
+	err = rows.StructScan(&authUser)
+	if err != nil {
+		return nil, err
+	}
+
+	return &authUser, nil
 }
