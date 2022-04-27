@@ -33,6 +33,7 @@ func (s *AuthGrpcService) Register(_ context.Context, user *auth.AuthData) (*aut
 	return &auth.Result{Success: true}, nil
 }
 
+// Login grpc endpoint for user login
 func (s *AuthGrpcService) Login(_ context.Context, loginData *auth.AuthData) (*auth.LoginResult, error) {
 	user, err := s.UserRepo.GetUser(loginData.Username)
 	if err != nil {
@@ -50,6 +51,7 @@ func (s *AuthGrpcService) Login(_ context.Context, loginData *auth.AuthData) (*a
 	return &auth.LoginResult{Token: token}, err
 }
 
+// CheckAuth grpc endpoint for authorization check
 func (s *AuthGrpcService) CheckAuth(_ context.Context, authData *auth.LoginResult) (*auth.CheckAuthResult, error) {
 	user, err := s.SessionRepo.GetUser(authData.Token)
 	if err != nil {
