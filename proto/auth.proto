@@ -7,6 +7,7 @@ package auth;
 service TcmsAuth {
   rpc Register(AuthData) returns (Result);
   rpc Login(AuthData) returns (LoginResult);
+  rpc CheckAuth(LoginResult) returns (CheckAuthResult);
 }
 
 message AuthData {
@@ -20,4 +21,9 @@ message Result {
 
 message LoginResult {
   string token = 1;
+}
+
+message CheckAuthResult {
+  string username = 1;
+  string telegramToken = 2;
 }

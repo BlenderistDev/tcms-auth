@@ -20,6 +20,7 @@ const _ = grpc.SupportPackageIsVersion7
 type TcmsAuthClient interface {
 	Register(ctx context.Context, in *AuthData, opts ...grpc.CallOption) (*Result, error)
 	Login(ctx context.Context, in *AuthData, opts ...grpc.CallOption) (*LoginResult, error)
+	CheckAuth(ctx context.Context, in *LoginResult, opts ...grpc.CallOption) (*CheckAuthResult, error)
 }
 
 type tcmsAuthClient struct {
@@ -48,12 +49,22 @@ func (c *tcmsAuthClient) Login(ctx context.Context, in *AuthData, opts ...grpc.C
 	return out, nil
 }
 
+func (c *tcmsAuthClient) CheckAuth(ctx context.Context, in *LoginResult, opts ...grpc.CallOption) (*CheckAuthResult, error) {
+	out := new(CheckAuthResult)
+	err := c.cc.Invoke(ctx, "/auth.TcmsAuth/CheckAuth", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // TcmsAuthServer is the server API for TcmsAuth service.
 // All implementations must embed UnimplementedTcmsAuthServer
 // for forward compatibility
 type TcmsAuthServer interface {
 	Register(context.Context, *AuthData) (*Result, error)
 	Login(context.Context, *AuthData) (*LoginResult, error)
+	CheckAuth(context.Context, *LoginResult) (*CheckAuthResult, error)
 	mustEmbedUnimplementedTcmsAuthServer()
 }
 
@@ -66,6 +77,9 @@ func (UnimplementedTcmsAuthServer) Register(context.Context, *AuthData) (*Result
 }
 func (UnimplementedTcmsAuthServer) Login(context.Context, *AuthData) (*LoginResult, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Login not implemented")
+}
+func (UnimplementedTcmsAuthServer) CheckAuth(context.Context, *LoginResult) (*CheckAuthResult, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CheckAuth not implemented")
 }
 func (UnimplementedTcmsAuthServer) mustEmbedUnimplementedTcmsAuthServer() {}
 
@@ -116,6 +130,24 @@ func _TcmsAuth_Login_Handler(srv interface{}, ctx context.Context, dec func(inte
 	return interceptor(ctx, in, info, handler)
 }
 
+func _TcmsAuth_CheckAuth_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(LoginResult)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TcmsAuthServer).CheckAuth(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/auth.TcmsAuth/CheckAuth",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TcmsAuthServer).CheckAuth(ctx, req.(*LoginResult))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // TcmsAuth_ServiceDesc is the grpc.ServiceDesc for TcmsAuth service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -130,6 +162,10 @@ var TcmsAuth_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Login",
 			Handler:    _TcmsAuth_Login_Handler,
+		},
+		{
+			MethodName: "CheckAuth",
+			Handler:    _TcmsAuth_CheckAuth_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
