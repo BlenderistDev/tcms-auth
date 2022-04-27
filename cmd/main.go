@@ -48,7 +48,7 @@ func startGrpcServer(userRepo repository.UserRepository, sessionRepo repository.
 	auth.RegisterTcmsAuthServer(s, &service.AuthGrpcService{
 		UserRepo:          userRepo,
 		SessionRepo:       sessionRepo,
-		PasswordGenerator: &password.Generator{},
+		PasswordGenerator: password.NewGenerator(),
 	})
 
 	return s.Serve(lis)

@@ -13,7 +13,7 @@ import (
 type AuthGrpcService struct {
 	UserRepo          repository.UserRepository
 	SessionRepo       repository.SessionRepository
-	PasswordGenerator *password.Generator
+	PasswordGenerator password.Generator
 	auth.UnimplementedTcmsAuthServer
 }
 

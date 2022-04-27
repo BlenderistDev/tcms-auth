@@ -8,7 +8,7 @@ import (
 
 func TestGenerator_Generate_Compare(t *testing.T) {
 	const password string = "secret"
-	g := Generator{}
+	g := generator{}
 	hash, err := g.Generate(password)
 	assert.Nil(t, err)
 	assert.Nil(t, g.Compare(hash, password))
