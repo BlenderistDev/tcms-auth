@@ -118,3 +118,44 @@ func TestAuthGrpcService_Register_repositoryError(t *testing.T) {
 	assert.False(t, res.GetSuccess())
 	assert.Equal(t, resErr, err)
 }
+
+func TestAuthGrpcService_Login(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	const userId = 1
+	const username = "name"
+	const password = "password"
+	const passwordHash = "passwordHash"
+	const token = "token"
+
+	user := &model.User{
+		Id:       userId,
+		Username: username,
+		Password: passwordHash,
+	}
+
+	userRepo := mock_repository.NewMockUserRepository(ctrl)
+	userRepo.EXPECT().GetUser(gomock.Eq(username)).Return(user, nil)
+
+	sessionRepo := mock_repository.NewMockSessionRepository(ctrl)
+	sessionRepo.EXPECT().Create(gomock.Eq(userId)).Return(token, nil)
+
+	passwordGenerator := mock_password.NewMockGenerator(ctrl)
+	passwordGenerator.EXPECT().Compare(gomock.Eq(passwordHash), gomock.Eq(password)).Return(nil)
+
+	service := AuthGrpcService{
+		UserRepo:          userRepo,
+		SessionRepo:       sessionRepo,
+		PasswordGenerator: passwordGenerator,
+	}
+
+	authData := &auth.AuthData{
+		Username: username,
+		Password: password,
+	}
+
+	res, err := service.Login(context.Background(), authData)
+	assert.Nil(t, err)
+	assert.Equal(t, token, res.Token)
+}
