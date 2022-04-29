@@ -2,13 +2,17 @@ package service
 
 import (
 	"context"
-	"fmt"
+	"errors"
 
 	"tcms-auth/internal/database/model"
 	"tcms-auth/internal/database/repository"
 	"tcms-auth/internal/password"
 	"tcms-auth/pkg/auth"
 )
+
+var ErrNoUser = errors.New("no user")
+var ErrWrongPassword = errors.New("wrong password")
+var ErrNoAuth = errors.New("user is not authed")
 
 type AuthGrpcService struct {
 	UserRepo          repository.UserRepository
@@ -39,8 +43,11 @@ func (s *AuthGrpcService) Login(_ context.Context, loginData *auth.AuthData) (*a
 	if err != nil {
 		return nil, err
 	}
+	if user == nil {
+		return nil, ErrNoUser
+	}
 	if s.PasswordGenerator.Compare(user.Password, loginData.Password) != nil {
-		return nil, fmt.Errorf("wrong password")
+		return nil, ErrWrongPassword
 	}
 
 	token, err := s.SessionRepo.Create(user.Id)
@@ -59,7 +66,7 @@ func (s *AuthGrpcService) CheckAuth(_ context.Context, authData *auth.LoginResul
 	}
 
 	if user == nil {
-		return nil, fmt.Errorf("user is not authed")
+		return nil, ErrNoAuth
 	}
 
 	return &auth.CheckAuthResult{
