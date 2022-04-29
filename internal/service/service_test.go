@@ -271,7 +271,6 @@ func TestAuthGrpcService_Login_sessionRepoError(t *testing.T) {
 	const username = "name"
 	const password = "password"
 	const passwordHash = "passwordHash"
-	const token = "token"
 
 	resErr := errors.New("some error")
 
@@ -285,7 +284,7 @@ func TestAuthGrpcService_Login_sessionRepoError(t *testing.T) {
 	userRepo.EXPECT().GetUser(gomock.Eq(username)).Return(user, nil)
 
 	sessionRepo := mock_repository.NewMockSessionRepository(ctrl)
-	sessionRepo.EXPECT().Create(gomock.Eq(userId)).Return(token, resErr)
+	sessionRepo.EXPECT().Create(gomock.Eq(userId)).Return("", resErr)
 
 	passwordGenerator := mock_password.NewMockGenerator(ctrl)
 	passwordGenerator.EXPECT().Compare(gomock.Eq(passwordHash), gomock.Eq(password)).Return(nil)
@@ -304,4 +303,93 @@ func TestAuthGrpcService_Login_sessionRepoError(t *testing.T) {
 	res, err := service.Login(context.Background(), authData)
 	assert.Nil(t, res)
 	assert.Equal(t, err, resErr)
+}
+
+func TestAuthGrpcRepo_CheckAuth(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	const username = "name"
+	const token = "token"
+	const telegramAccessKey = "tg_access_key"
+
+	user := &model.AuthUser{
+		Username:          username,
+		TelegramAccessKey: telegramAccessKey,
+	}
+
+	userRepo := mock_repository.NewMockUserRepository(ctrl)
+	passwordGenerator := mock_password.NewMockGenerator(ctrl)
+
+	sessionRepo := mock_repository.NewMockSessionRepository(ctrl)
+	sessionRepo.EXPECT().GetUser(gomock.Eq(token)).Return(user, nil)
+
+	service := AuthGrpcService{
+		UserRepo:          userRepo,
+		SessionRepo:       sessionRepo,
+		PasswordGenerator: passwordGenerator,
+	}
+
+	resData := &auth.CheckAuthResult{
+		Username:      username,
+		TelegramToken: telegramAccessKey,
+	}
+
+	income := &auth.LoginResult{Token: token}
+
+	res, err := service.CheckAuth(context.Background(), income)
+	assert.Nil(t, err)
+	assert.Equal(t, resData, res)
+}
+
+func TestAuthGrpcRepo_CheckAuth_sessionRepoError(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	const token = "token"
+
+	resErr := errors.New("some error")
+
+	userRepo := mock_repository.NewMockUserRepository(ctrl)
+	passwordGenerator := mock_password.NewMockGenerator(ctrl)
+
+	sessionRepo := mock_repository.NewMockSessionRepository(ctrl)
+	sessionRepo.EXPECT().GetUser(gomock.Eq(token)).Return(nil, resErr)
+
+	service := AuthGrpcService{
+		UserRepo:          userRepo,
+		SessionRepo:       sessionRepo,
+		PasswordGenerator: passwordGenerator,
+	}
+
+	income := &auth.LoginResult{Token: token}
+
+	res, err := service.CheckAuth(context.Background(), income)
+	assert.Nil(t, res)
+	assert.Equal(t, resErr, err)
+}
+
+func TestAuthGrpcRepo_CheckAuth_noAuthError(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	const token = "token"
+
+	userRepo := mock_repository.NewMockUserRepository(ctrl)
+	passwordGenerator := mock_password.NewMockGenerator(ctrl)
+
+	sessionRepo := mock_repository.NewMockSessionRepository(ctrl)
+	sessionRepo.EXPECT().GetUser(gomock.Eq(token)).Return(nil, nil)
+
+	service := AuthGrpcService{
+		UserRepo:          userRepo,
+		SessionRepo:       sessionRepo,
+		PasswordGenerator: passwordGenerator,
+	}
+
+	income := &auth.LoginResult{Token: token}
+
+	res, err := service.CheckAuth(context.Background(), income)
+	assert.Nil(t, res)
+	assert.Equal(t, ErrNoAuth, err)
 }
