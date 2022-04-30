@@ -10,8 +10,13 @@ import (
 	"tcms-auth/pkg/auth"
 )
 
+// ErrNoUser user not found
 var ErrNoUser = errors.New("no user")
+
+// ErrWrongPassword password is incorrect
 var ErrWrongPassword = errors.New("wrong password")
+
+// ErrNoAuth user is not authed
 var ErrNoAuth = errors.New("user is not authed")
 
 type AuthGrpcService struct {
