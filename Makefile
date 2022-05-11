@@ -24,3 +24,10 @@ gen-user-repository-mock:
 
 gen-password-generator-mock:
 	@mockgen -source=internal/password/hash.go -destination=internal/testing/password/hash.go
+
+gen-telegram:
+	@protoc --go_out=. --go_opt=paths=source_relative --go-grpc_out=. --go-grpc_opt=paths=source_relative proto/telegram.proto
+	@mv proto/telegram*.go pkg/telegram/
+
+gen-telegram-mock:
+	@mockgen -source=pkg/telegram/telegram_grpc.pb.go -destination=internal/testing/telegram/telegram_grpc.pb.go
