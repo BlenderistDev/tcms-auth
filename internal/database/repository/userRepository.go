@@ -8,6 +8,7 @@ import (
 type UserRepository interface {
 	Create(user *model.User) error
 	GetUser(username string) (*model.User, error)
+	UpdateTelegramAccessKey(id int, key string) error
 }
 
 type userRepository struct {
@@ -34,6 +35,12 @@ func (u *userRepository) GetUser(username string) (*model.User, error) {
 		return nil, err
 	}
 	return &user, nil
+}
+
+// UpdateTelegramAccessKey updates telegram access key for specified user id
+func (u *userRepository) UpdateTelegramAccessKey(id int, key string) error {
+	_, err := u.db.Exec("UPDATE users SET telegram_access_key = $1 WHERE id = $2", key, id)
+	return err
 }
 
 // NewUserRepository creates new user repository
