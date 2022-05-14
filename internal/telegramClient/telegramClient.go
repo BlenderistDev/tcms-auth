@@ -11,6 +11,8 @@ import (
 	"tcms-auth/pkg/telegram"
 )
 
+var ErrNoUserId = errors.New("no user id")
+
 type TelegramClient interface {
 	Authorization(ctx context.Context, phone string) error
 	AuthSignIn(ctx context.Context, code string) error
@@ -49,7 +51,7 @@ func (t *telegramClient) AuthSignIn(ctx context.Context, code string) error {
 	md, _ := metadata.FromIncomingContext(ctx)
 	userId := md.Get("userId")[0]
 	if len(userId) == 0 {
-		return errors.New("no user id")
+		return ErrNoUserId
 	}
 	id, err := strconv.Atoi(userId)
 	if err != nil {
