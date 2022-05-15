@@ -2,16 +2,14 @@ package telegramClient
 
 import (
 	"context"
-	"errors"
 	"strconv"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
 	"tcms-auth/internal/database/repository"
+	"tcms-auth/internal/errors"
 	"tcms-auth/pkg/telegram"
 )
-
-var ErrNoUserId = errors.New("no user id")
 
 type TelegramClient interface {
 	Authorization(ctx context.Context, phone string) error
@@ -51,7 +49,7 @@ func (t *telegramClient) AuthSignIn(ctx context.Context, code string) error {
 	md, _ := metadata.FromIncomingContext(ctx)
 	userId := md.Get("userId")[0]
 	if len(userId) == 0 {
-		return ErrNoUserId
+		return errors.ErrNoUserId
 	}
 	id, err := strconv.Atoi(userId)
 	if err != nil {
