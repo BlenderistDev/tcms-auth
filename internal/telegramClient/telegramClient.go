@@ -2,18 +2,15 @@ package telegramClient
 
 import (
 	"context"
-	"strconv"
 
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/metadata"
 	"tcms-auth/internal/database/repository"
-	"tcms-auth/internal/errors"
 	"tcms-auth/pkg/telegram"
 )
 
 type TelegramClient interface {
 	Authorization(ctx context.Context, phone string) error
-	AuthSignIn(ctx context.Context, code string) error
+	AuthSignIn(ctx context.Context, userId int, code string) error
 }
 
 type telegramClient struct {
@@ -41,22 +38,13 @@ func (t *telegramClient) Authorization(ctx context.Context, phone string) error 
 }
 
 // AuthSignIn request for sign in telegram client with auth code
-func (t *telegramClient) AuthSignIn(ctx context.Context, code string) error {
+func (t *telegramClient) AuthSignIn(ctx context.Context, userId int, code string) error {
 	res, err := t.telegram.Sign(ctx, &telegram.SignMessage{Code: code})
 	if err != nil {
 		return err
 	}
-	md, _ := metadata.FromIncomingContext(ctx)
-	userId := md.Get("userId")[0]
-	if len(userId) == 0 {
-		return errors.ErrNoUserId
-	}
-	id, err := strconv.Atoi(userId)
-	if err != nil {
-		return err
-	}
 
-	err = t.userRepo.UpdateTelegramAccessKey(id, res.Session)
+	err = t.userRepo.UpdateTelegramAccessKey(userId, res.Session)
 	if err != nil {
 		return err
 	}

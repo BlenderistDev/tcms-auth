@@ -2,12 +2,13 @@ package service
 
 import (
 	"context"
-	"errors"
+	"fmt"
 	"testing"
 
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	"tcms-auth/internal/database/model"
+	"tcms-auth/internal/errors"
 	mock_repository "tcms-auth/internal/testing/database/repository"
 	mock_password "tcms-auth/internal/testing/password"
 	"tcms-auth/pkg/auth"
@@ -57,7 +58,7 @@ func TestAuthGrpcService_Register_passwordGenerateError(t *testing.T) {
 	const username = "name"
 	const password = "password"
 
-	resErr := errors.New("some error")
+	resErr := fmt.Errorf("some error")
 
 	userRepo := mock_repository.NewMockUserRepository(ctrl)
 	sessionRepo := mock_repository.NewMockSessionRepository(ctrl)
@@ -88,7 +89,7 @@ func TestAuthGrpcService_Register_repositoryError(t *testing.T) {
 	const password = "password"
 	const passwordHash = "passwordHash"
 
-	resErr := errors.New("some error")
+	resErr := fmt.Errorf("some error")
 
 	user := &model.User{
 		Username: username,
@@ -167,7 +168,7 @@ func TestAuthGrpcService_Login_userRepoError(t *testing.T) {
 	const username = "name"
 	const password = "password"
 
-	resErr := errors.New("some error")
+	resErr := fmt.Errorf("some error")
 
 	userRepo := mock_repository.NewMockUserRepository(ctrl)
 	userRepo.EXPECT().GetUser(gomock.Eq(username)).Return(nil, resErr)
@@ -219,7 +220,7 @@ func TestAuthGrpcService_Login_noUser(t *testing.T) {
 
 	res, err := service.Login(context.Background(), authData)
 	assert.Nil(t, res)
-	assert.Equal(t, ErrNoUser, err)
+	assert.Equal(t, errors.ErrNoUser, err)
 }
 
 func TestAuthGrpcService_Login_wrongPassword(t *testing.T) {
@@ -231,7 +232,7 @@ func TestAuthGrpcService_Login_wrongPassword(t *testing.T) {
 	const password = "password"
 	const passwordHash = "passwordHash"
 
-	resErr := errors.New("some error")
+	resErr := fmt.Errorf("some error")
 
 	user := &model.User{
 		Id:       userId,
@@ -260,7 +261,7 @@ func TestAuthGrpcService_Login_wrongPassword(t *testing.T) {
 
 	res, err := service.Login(context.Background(), authData)
 	assert.Nil(t, res)
-	assert.Equal(t, ErrWrongPassword, err)
+	assert.Equal(t, errors.ErrWrongPassword, err)
 }
 
 func TestAuthGrpcService_Login_sessionRepoError(t *testing.T) {
@@ -272,7 +273,7 @@ func TestAuthGrpcService_Login_sessionRepoError(t *testing.T) {
 	const password = "password"
 	const passwordHash = "passwordHash"
 
-	resErr := errors.New("some error")
+	resErr := fmt.Errorf("some error")
 
 	user := &model.User{
 		Id:       userId,
@@ -348,7 +349,7 @@ func TestAuthGrpcRepo_CheckAuth_sessionRepoError(t *testing.T) {
 
 	const token = "token"
 
-	resErr := errors.New("some error")
+	resErr := fmt.Errorf("some error")
 
 	userRepo := mock_repository.NewMockUserRepository(ctrl)
 	passwordGenerator := mock_password.NewMockGenerator(ctrl)
@@ -391,5 +392,5 @@ func TestAuthGrpcRepo_CheckAuth_noAuthError(t *testing.T) {
 
 	res, err := service.CheckAuth(context.Background(), income)
 	assert.Nil(t, res)
-	assert.Equal(t, ErrNoAuth, err)
+	assert.Equal(t, errors.ErrNoAuth, err)
 }

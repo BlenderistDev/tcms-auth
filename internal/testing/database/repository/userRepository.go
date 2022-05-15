@@ -62,3 +62,17 @@ func (mr *MockUserRepositoryMockRecorder) GetUser(username interface{}) *gomock.
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUser", reflect.TypeOf((*MockUserRepository)(nil).GetUser), username)
 }
+
+// UpdateTelegramAccessKey mocks base method.
+func (m *MockUserRepository) UpdateTelegramAccessKey(id int, key string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateTelegramAccessKey", id, key)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdateTelegramAccessKey indicates an expected call of UpdateTelegramAccessKey.
+func (mr *MockUserRepositoryMockRecorder) UpdateTelegramAccessKey(id, key interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateTelegramAccessKey", reflect.TypeOf((*MockUserRepository)(nil).UpdateTelegramAccessKey), id, key)
+}
