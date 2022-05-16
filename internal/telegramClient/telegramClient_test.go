@@ -31,6 +31,30 @@ func TestTelegramClient_Authorization(t *testing.T) {
 	assert.Nil(t, err)
 }
 
+func TestTelegramClient_AuthSignIn(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	const code = "999999"
+	const userId = 1
+	const session = "session"
+
+	resp := &telegram.SignResult{Session: session}
+
+	request := &telegram.SignMessage{Code: code}
+	ctx := context.Background()
+
+	client := mock_telegram.NewMockTelegramClient(ctrl)
+	client.EXPECT().Sign(gomock.Eq(ctx), gomock.Eq(request)).Return(resp, nil)
+
+	userRepo := mock_repository.NewMockUserRepository(ctrl)
+	userRepo.EXPECT().UpdateTelegramAccessKey(gomock.Eq(userId), gomock.Eq(session)).Return(nil)
+
+	tg := newTelegram(client, userRepo)
+	err := tg.AuthSignIn(ctx, userId, code)
+	assert.Nil(t, err)
+}
+
 func TestGetTelegram(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
