@@ -21,6 +21,7 @@ type TcmsAuthClient interface {
 	Register(ctx context.Context, in *AuthData, opts ...grpc.CallOption) (*Result, error)
 	Login(ctx context.Context, in *AuthData, opts ...grpc.CallOption) (*LoginResult, error)
 	CheckAuth(ctx context.Context, in *LoginResult, opts ...grpc.CallOption) (*CheckAuthResult, error)
+	TelegramAuth(ctx context.Context, in *TelegramAuthRequest, opts ...grpc.CallOption) (*TelegramAuthResponse, error)
 }
 
 type tcmsAuthClient struct {
@@ -58,6 +59,15 @@ func (c *tcmsAuthClient) CheckAuth(ctx context.Context, in *LoginResult, opts ..
 	return out, nil
 }
 
+func (c *tcmsAuthClient) TelegramAuth(ctx context.Context, in *TelegramAuthRequest, opts ...grpc.CallOption) (*TelegramAuthResponse, error) {
+	out := new(TelegramAuthResponse)
+	err := c.cc.Invoke(ctx, "/auth.TcmsAuth/TelegramAuth", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // TcmsAuthServer is the server API for TcmsAuth service.
 // All implementations must embed UnimplementedTcmsAuthServer
 // for forward compatibility
@@ -65,6 +75,7 @@ type TcmsAuthServer interface {
 	Register(context.Context, *AuthData) (*Result, error)
 	Login(context.Context, *AuthData) (*LoginResult, error)
 	CheckAuth(context.Context, *LoginResult) (*CheckAuthResult, error)
+	TelegramAuth(context.Context, *TelegramAuthRequest) (*TelegramAuthResponse, error)
 	mustEmbedUnimplementedTcmsAuthServer()
 }
 
@@ -80,6 +91,9 @@ func (UnimplementedTcmsAuthServer) Login(context.Context, *AuthData) (*LoginResu
 }
 func (UnimplementedTcmsAuthServer) CheckAuth(context.Context, *LoginResult) (*CheckAuthResult, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CheckAuth not implemented")
+}
+func (UnimplementedTcmsAuthServer) TelegramAuth(context.Context, *TelegramAuthRequest) (*TelegramAuthResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method TelegramAuth not implemented")
 }
 func (UnimplementedTcmsAuthServer) mustEmbedUnimplementedTcmsAuthServer() {}
 
@@ -148,6 +162,24 @@ func _TcmsAuth_CheckAuth_Handler(srv interface{}, ctx context.Context, dec func(
 	return interceptor(ctx, in, info, handler)
 }
 
+func _TcmsAuth_TelegramAuth_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(TelegramAuthRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TcmsAuthServer).TelegramAuth(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/auth.TcmsAuth/TelegramAuth",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TcmsAuthServer).TelegramAuth(ctx, req.(*TelegramAuthRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // TcmsAuth_ServiceDesc is the grpc.ServiceDesc for TcmsAuth service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -166,6 +198,10 @@ var TcmsAuth_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "CheckAuth",
 			Handler:    _TcmsAuth_CheckAuth_Handler,
+		},
+		{
+			MethodName: "TelegramAuth",
+			Handler:    _TcmsAuth_TelegramAuth_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

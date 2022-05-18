@@ -8,6 +8,7 @@ service TcmsAuth {
   rpc Register(AuthData) returns (Result);
   rpc Login(AuthData) returns (LoginResult);
   rpc CheckAuth(LoginResult) returns (CheckAuthResult);
+  rpc TelegramAuth(TelegramAuthRequest) returns (TelegramAuthResponse);
 }
 
 message AuthData {
@@ -26,4 +27,13 @@ message LoginResult {
 message CheckAuthResult {
   string username = 1;
   string telegramToken = 2;
+}
+
+message TelegramAuthRequest {
+  int32 userId = 1;
+  string phone = 2;
+}
+
+message TelegramAuthResponse {
+  bool success = 1;
 }
