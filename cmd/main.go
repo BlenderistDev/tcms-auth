@@ -7,10 +7,12 @@ import (
 
 	"github.com/joho/godotenv"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 	"tcms-auth/internal/database"
 	"tcms-auth/internal/database/repository"
 	"tcms-auth/internal/password"
 	"tcms-auth/internal/service"
+	"tcms-auth/internal/telegramClient"
 	"tcms-auth/pkg/auth"
 )
 
@@ -30,13 +32,19 @@ func main() {
 	userRepo := repository.NewUserRepository(db)
 	sessionRepo := repository.NewSessionRepository(db)
 
-	if err := startGrpcServer(userRepo, sessionRepo); err != nil {
+	conn, err := grpc.Dial(os.Getenv("TELEGRAM_HOST"), grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		log.Fatal(err)
+	}
+	tg := telegramClient.GetTelegram(conn, userRepo)
+
+	if err := startGrpcServer(userRepo, sessionRepo, tg); err != nil {
 		log.Fatal(err)
 	}
 
 }
 
-func startGrpcServer(userRepo repository.UserRepository, sessionRepo repository.SessionRepository) error {
+func startGrpcServer(userRepo repository.UserRepository, sessionRepo repository.SessionRepository, telegramClient telegramClient.TelegramClient) error {
 	addr := os.Getenv("AUTH_GRPC_HOST")
 	lis, err := net.Listen("tcp", addr)
 	if err != nil {
@@ -49,6 +57,7 @@ func startGrpcServer(userRepo repository.UserRepository, sessionRepo repository.
 		UserRepo:          userRepo,
 		SessionRepo:       sessionRepo,
 		PasswordGenerator: password.NewGenerator(),
+		TelegramClient: telegramClient,
 	})
 
 	return s.Serve(lis)

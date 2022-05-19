@@ -7,6 +7,7 @@ import (
 	"tcms-auth/internal/database/repository"
 	"tcms-auth/internal/errors"
 	"tcms-auth/internal/password"
+	"tcms-auth/internal/telegramClient"
 	"tcms-auth/pkg/auth"
 )
 
@@ -14,6 +15,7 @@ type AuthGrpcService struct {
 	UserRepo          repository.UserRepository
 	SessionRepo       repository.SessionRepository
 	PasswordGenerator password.Generator
+	TelegramClient 	  telegramClient.TelegramClient
 	auth.UnimplementedTcmsAuthServer
 }
 
