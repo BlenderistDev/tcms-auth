@@ -2,7 +2,9 @@ package service
 
 import (
 	"context"
+	"strconv"
 
+	"google.golang.org/grpc/metadata"
 	"tcms-auth/internal/database/model"
 	"tcms-auth/internal/database/repository"
 	"tcms-auth/internal/errors"
@@ -75,6 +77,7 @@ func (s *AuthGrpcService) CheckAuth(_ context.Context, authData *auth.LoginResul
 
 // TelegramAuth sends code for telegram auth
 func (s *AuthGrpcService) TelegramAuth(ctx context.Context, authData *auth.TelegramAuthRequest) (*auth.TelegramAuthResponse, error) {
+	ctx = metadata.AppendToOutgoingContext(ctx, "userId", strconv.Itoa(int(authData.UserId)))
 	err := s.TelegramClient.Authorization(ctx, authData.Phone)
 	if err != nil {
 		return nil, err
