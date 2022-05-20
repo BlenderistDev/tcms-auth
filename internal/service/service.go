@@ -15,7 +15,7 @@ type AuthGrpcService struct {
 	UserRepo          repository.UserRepository
 	SessionRepo       repository.SessionRepository
 	PasswordGenerator password.Generator
-	TelegramClient 	  telegramClient.TelegramClient
+	TelegramClient    telegramClient.TelegramClient
 	auth.UnimplementedTcmsAuthServer
 }
 
@@ -71,4 +71,14 @@ func (s *AuthGrpcService) CheckAuth(_ context.Context, authData *auth.LoginResul
 		Username:      user.Username,
 		TelegramToken: user.TelegramAccessKey,
 	}, nil
+}
+
+// TelegramAuth sends code for telegram auth
+func (s *AuthGrpcService) TelegramAuth(ctx context.Context, authData *auth.TelegramAuthRequest) (*auth.TelegramAuthResponse, error) {
+	err := s.TelegramClient.Authorization(ctx, authData.Phone)
+	if err != nil {
+		return nil, err
+	}
+
+	return &auth.TelegramAuthResponse{Success: true}, nil
 }
