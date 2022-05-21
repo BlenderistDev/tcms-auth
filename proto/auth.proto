@@ -37,3 +37,8 @@ message TelegramAuthRequest {
 message TelegramAuthResponse {
   bool success = 1;
 }
+
+message TelegramSignRequest {
+  int32 userId = 1;
+  string code = 2;
+}
