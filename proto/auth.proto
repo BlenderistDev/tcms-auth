@@ -9,6 +9,7 @@ service TcmsAuth {
   rpc Login(AuthData) returns (LoginResult);
   rpc CheckAuth(LoginResult) returns (CheckAuthResult);
   rpc TelegramAuth(TelegramAuthRequest) returns (TelegramAuthResponse);
+  rpc TelegramSign(TelegramSignRequest) returns (TelegramAuthResponse);
 }
 
 message AuthData {
