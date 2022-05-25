@@ -85,3 +85,13 @@ func (s *AuthGrpcService) TelegramAuth(ctx context.Context, authData *auth.Teleg
 
 	return &auth.TelegramAuthResponse{Success: true}, nil
 }
+
+// TelegramSign sign in telegram
+func (s *AuthGrpcService) TelegramSign(ctx context.Context, signData *auth.TelegramSignRequest) (*auth.TelegramAuthResponse, error) {
+	err := s.TelegramClient.AuthSignIn(ctx, int(signData.UserId), signData.Code)
+	if err != nil {
+		return nil, err
+	}
+
+	return &auth.TelegramAuthResponse{Success: true}, nil
+}
